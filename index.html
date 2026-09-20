@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="What one more billable hour per technician per week is worth to a heavy-duty repair shop. Fill in the shop's figures and print the one-page brief.">
+<title>One More Billable Hour</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+  :root{
+    --chrome-bg:#EDF0F5; --chrome-fg:#16233F; --chrome-muted:#5C6579; --chrome-line:#D3D9E4;
+    --field-bg:#FFFFFF; --field-line:#B9C2D2; --field-fg:#16233F;
+    --ink:#16233F; --ink-soft:#4A5468; --rule:#DCE1EA; --paper:#FFFFFF;
+    --brass:#A2560F; --band:#16233F; --band-fg:#FFFFFF; --tint:#EEF2F8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --chrome-bg:#141821; --chrome-fg:#E7EAF1; --chrome-muted:#98A1B4; --chrome-line:#2A3140;
+      --field-bg:#1D2330; --field-line:#3A4356; --field-fg:#E7EAF1;
+    }
+  }
+  :root[data-theme="dark"]{
+    --chrome-bg:#141821; --chrome-fg:#E7EAF1; --chrome-muted:#98A1B4; --chrome-line:#2A3140;
+    --field-bg:#1D2330; --field-line:#3A4356; --field-fg:#E7EAF1;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--chrome-bg); color:var(--chrome-fg);
+       font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+  .wrap{padding-block:20px; padding-left:16px; padding-right:16px; max-width:1000px; margin:0 auto;}
+
+  /* ---------- controls ---------- */
+  .panel{border:1px solid var(--chrome-line); border-radius:8px; background:var(--field-bg);
+         padding:14px 16px 16px; margin-bottom:22px;}
+  .panel h2{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.14em;
+            text-transform:uppercase; color:var(--chrome-muted); margin:0 0 12px; font-weight:600;}
+  .fields{display:flex; flex-wrap:wrap; gap:12px;}
+  .f{display:flex; flex-direction:column; gap:4px; flex:1 1 130px; min-width:0;}
+  .f.wide{flex:2 1 220px;}
+  .f label{font-size:11.5px; font-weight:600; color:var(--chrome-muted);}
+  .f input{font:inherit; font-size:15px; padding:7px 9px; border:1px solid var(--field-line);
+           border-radius:5px; background:var(--field-bg); color:var(--field-fg); width:100%;
+           font-variant-numeric:tabular-nums;}
+  .f input:focus-visible{outline:2px solid var(--brass); outline-offset:1px; border-color:var(--brass);}
+  .hint{margin:12px 0 0; font-size:12px; color:var(--chrome-muted); line-height:1.5;}
+  .hint b{color:var(--chrome-fg); font-weight:600;}
+
+  /* ---------- the sheet ---------- */
+  .sheet{background:var(--paper); color:var(--ink); border-radius:4px;
+         box-shadow:0 1px 3px rgba(11,19,38,.16), 0 8px 28px rgba(11,19,38,.10);
+         padding:40px 44px 34px; font-size:13.5px; line-height:1.45;}
+  .sheet h1{font-family:"Source Serif 4",Georgia,serif; font-weight:700; font-size:31px;
+            line-height:1.1; margin:0 0 6px; color:var(--ink); text-wrap:balance;}
+  .byline{font-size:12px; color:var(--ink-soft); margin:0 0 14px;}
+  .hr{height:3px; background:var(--ink); margin-bottom:16px;}
+  .lede{font-size:16px; line-height:1.45; margin:0 0 4px; max-width:66ch;}
+  .lede strong{color:var(--brass); font-weight:600; white-space:nowrap;}
+  h2.band{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; font-weight:600;
+          letter-spacing:.13em; text-transform:uppercase; background:var(--band); color:var(--band-fg);
+          padding:4px 9px; margin:20px 0 10px; border-radius:2px;}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  table{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums;}
+  .calc td{padding:4px 2px; border-bottom:1px solid var(--rule); font-size:13px;}
+  .calc td:last-child{text-align:right; white-space:nowrap; font-weight:500;}
+  .calc tr.key td{font-weight:600;}
+  .calc tr.key td:last-child{color:var(--brass);}
+  .calc tr.sum td{border-top:2px solid var(--ink); border-bottom:none; padding-top:9px;
+                  font-family:"Source Serif 4",Georgia,serif; font-size:19px; font-weight:700;}
+  .calc tr.sum td:last-child{color:var(--brass);}
+  .grid th{background:var(--band); color:var(--band-fg); font-size:11px; font-weight:600; padding:6px 6px;
+           line-height:1.25;}
+  .grid td{border:1px solid var(--rule); padding:7px 6px; text-align:center; font-size:13px; white-space:nowrap;}
+  .grid tr.focus td{background:var(--tint); font-weight:600; color:var(--brass);}
+  .grid tr.focus td:first-child{color:var(--ink);}
+  .note{font-size:11.5px; line-height:1.45; color:var(--ink-soft); margin:8px 0 0;}
+  ul{margin:0; padding-left:17px;}
+  li{margin-bottom:5px;}
+  li b, .q b{color:var(--ink); font-weight:600;}
+  .q{margin-bottom:9px;}
+  .q b{display:block; margin-bottom:1px;}
+  .box{border:1px solid var(--ink); border-left:4px solid var(--brass); padding:12px 14px; border-radius:2px;}
+  .lbl{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px; font-weight:600;
+       letter-spacing:.1em; text-transform:uppercase; color:var(--brass); margin-bottom:6px;}
+  .foot{margin-top:18px; padding-top:10px; border-top:1px solid var(--rule);
+        font-size:10.5px; line-height:1.5; color:var(--ink-soft);}
+  .foot b{color:var(--ink);}
+
+  @media (max-width:720px){
+    .sheet{padding:26px 20px 22px;}
+    .sheet h1{font-size:25px;}
+    .two{grid-template-columns:1fr; gap:14px;}
+  }
+
+  @media print{
+    @page{size:letter; margin:0.4in 0.5in;}
+    body{background:#fff;}
+    .wrap{padding:0; max-width:none;}
+    .panel, .hint{display:none !important;}
+    .sheet{box-shadow:none; padding:0; border-radius:0; font-size:9.1pt; line-height:1.26;}
+    .sheet h1{font-size:20pt;}
+    .lede{font-size:10.2pt; line-height:1.32;}
+    h2.band{margin:9px 0 5px; font-size:8.2pt;}
+    .calc td{padding:2.2px 2px; font-size:8.9pt;}
+    .calc tr.sum td{font-size:13pt; padding-top:6px;}
+    .grid td{padding:4.5px 5px; font-size:8.9pt;}
+    .grid th{font-size:7.8pt; padding:4px 5px;}
+    .two{gap:16px;}
+    li{margin-bottom:2.5px;}
+    .q{margin-bottom:5px;}
+    .box{padding:7px 9px;}
+    .foot{margin-top:9px; padding-top:6px; font-size:7.3pt;}
+    .note{font-size:7.8pt;}
+  }
+</style>
+<style>
+  html { color-scheme: light dark; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <section class="panel" aria-label="Shop figures">
+    <h2>This shop's figures</h2>
+    <div class="fields">
+      <div class="f wide">
+        <label for="shop">Shop</label>
+        <input id="shop" type="text" value="Example Shop" autocomplete="off">
+      </div>
+      <div class="f">
+        <label for="techs">Technicians</label>
+        <input id="techs" type="number" min="1" step="1" value="4">
+      </div>
+      <div class="f">
+        <label for="rate">Labor rate $/hr</label>
+        <input id="rate" type="number" min="0" step="1" value="150">
+      </div>
+      <div class="f">
+        <label for="wage">Tech wage $/hr</label>
+        <input id="wage" type="number" min="0" step="0.5" value="33">
+      </div>
+      <div class="f">
+        <label for="burden">Burden &times;</label>
+        <input id="burden" type="number" min="1" step="0.05" value="1.30">
+      </div>
+      <div class="f">
+        <label for="weeks">Working weeks</label>
+        <input id="weeks" type="number" min="1" max="52" step="1" value="50">
+      </div>
+    </div>
+    <p class="hint">Prefilled with industry-median figures — replace them with the shop's own. Everything below recalculates as you type.
+      <b>To hand it over:</b> print the page (⌘P / Ctrl+P) and save as PDF — the fields above drop off and the brief prints on one sheet.</p>
+  </section>
+
+  <article class="sheet">
+    <h1>What One More Billable Hour Is Worth</h1>
+    <p class="byline"><span id="o-shop">Example Shop</span> &nbsp;·&nbsp; An operating brief for shop ownership &nbsp;·&nbsp; Fullbay onboarding &amp; enablement program</p>
+    <div class="hr"></div>
+
+    <p class="lede">This shop's revenue is completed, billable hours — not bays, not headcount. One more of those per technician
+      per week is worth <strong id="o-lede-gp">$21,420</strong> a year in gross profit, and it takes no new customer,
+      no new hire and no new equipment.</p>
+
+    <h2 class="band">The arithmetic</h2>
+    <div class="two">
+      <div>
+        <table class="calc">
+          <tbody>
+            <tr><td>Shop labor rate</td><td id="o-rate">$150.00 / hr</td></tr>
+            <tr><td>Technician wage</td><td id="o-wage">$33.00 / hr</td></tr>
+            <tr><td>Loaded cost <span id="o-burden-lbl">(1.30× burden)</span></td><td id="o-loaded">$42.90 / hr</td></tr>
+            <tr class="key"><td>Contribution per added hour</td><td id="o-contrib">$107.10</td></tr>
+            <tr><td id="o-hours-lbl">4 techs × 1 hour × 50 weeks</td><td id="o-hours">200 hours</td></tr>
+            <tr class="sum"><td>Added gross profit, a year</td><td id="o-gp">$21,420</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Added revenue is <span id="o-rev">$30,000</span>. Gross profit is the number that matters: overhead is already
+          covered by the hours being billed today, so an incremental hour carries only the technician's loaded cost.</p>
+      </div>
+      <div>
+        <table class="grid">
+          <thead>
+            <tr><th>Added hour<br>per tech / week</th><th>Hours<br>a year</th><th>Revenue<br>a year</th><th>Gross profit<br>a year</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>30 minutes</td><td id="s0-h">100</td><td id="s0-r">$15,000</td><td id="s0-g">$10,710</td></tr>
+            <tr class="focus"><td>1 hour</td><td id="s1-h">200</td><td id="s1-r">$30,000</td><td id="s1-g">$21,420</td></tr>
+            <tr><td>2 hours</td><td id="s2-h">400</td><td id="s2-r">$60,000</td><td id="s2-g">$42,840</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Half an hour a week is about six minutes a day per technician. At <span id="o-techs-note">4</span> technicians,
+          one hour each is <span id="o-week-gp">$428</span> of gross profit a week — <span id="o-month-gp">$1,855</span> a month.</p>
+      </div>
+    </div>
+
+    <h2 class="band">Where the hour actually comes from</h2>
+    <div class="two">
+      <ul>
+        <li><b>Time clocked in but not on a job.</b> Usually waiting on parts, waiting on a hand-off, or an hour that never got clocked — rarely effort.</li>
+        <li><b>Jobs that finish at ninety percent.</b> An unfinished job earns nothing this week, however much work went into it.</li>
+      </ul>
+      <ul>
+        <li><b>Comebacks.</b> The same hour spent twice, and typically worth more than the original job earned.</li>
+        <li><b>Work already in the bay.</b> Inspections turn up a safety issue 60% of the time and 89% of those get repaired. It needs no marketing.</li>
+      </ul>
+    </div>
+
+    <h2 class="band">What ownership should be deciding</h2>
+    <div class="two">
+      <div>
+        <div class="q"><b>Is the gap capacity or demand?</b>If techs are clocked in but not on jobs, adding a technician buys a more expensive version of the same week.</div>
+        <div class="q"><b>When did we last move the labor rate?</b>The industry median went $135 to $149 in under two years, and 12% of shops have never reassessed. A rate move is margin that requires nobody to work harder.</div>
+      </div>
+      <div>
+        <div class="q"><b>How fast does finished work become cash?</b>Shops average 10.9 to 15.3 days from job open to invoice. Days sitting in Ready to Invoice are wages and parts already spent and not yet billed.</div>
+        <div class="q"><b>Can we keep the technicians we have?</b>57% of shops are understaffed and 26% of techs intend to leave or start their own shop within a year. A replacement hire costs more than a raise.</div>
+      </div>
+    </div>
+
+    <h2 class="band">Using this for raises and promotions</h2>
+    <div class="box">
+      <div class="two">
+        <div>
+          <div class="lbl">What this data supports</div>
+          <ul>
+            <li><b>Sustained performance</b> — a rolling three to six months, not one good week.</li>
+            <li><b>Certification tier reached</b> — an earned, documented standard applied the same way to everyone.</li>
+            <li><b>Quality alongside output</b> — comebacks read next to hours, so speed alone never carries a case.</li>
+            <li><b>Contribution in dollars</b> — what the technician's year is worth, which is the language a raise conversation needs.</li>
+          </ul>
+        </div>
+        <div>
+          <div class="lbl">What it does not support</div>
+          <ul>
+            <li><b>A single week, or a single rank.</b> Rank moves weekly and partly reflects which jobs got assigned.</li>
+            <li><b>Anything the technician doesn't control.</b> Utilization suffers when parts and dispatch are slow; that isn't a pay issue.</li>
+            <li><b>Denying a raise by itself.</b> Use it to justify a yes, and to show what a yes would require — not as evidence for no.</li>
+          </ul>
+          <p class="note">A ladder that works: Basic certification qualifies, Advanced plus two sustained quarters earns senior,
+            Master plus mentoring earns lead. Confirm any pay change with HR and payroll before it reaches a technician.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <b>Assumptions.</b> Contribution per hour is the labor rate less the technician's loaded hourly cost, on the basis that fixed overhead is
+      covered by current volume. Annualized at <span id="o-weeks-note">50</span> working weeks. Added hours must be billable <i>and</i> collected to be worth this.
+      <b>Sources.</b> Labor rate, wage, turnaround, inspection and workforce figures: Fullbay <i>State of Heavy-Duty Repair 2025–2026</i>
+      (~900 respondents plus 3,400+ Fullbay shops, collected late 2025). Efficiency and utilization benchmarks: Fullbay Help Center, “Benchmarks.”
+      Week-by-week shop figures calculate in the weekly technician workbook.
+    </div>
+  </article>
+</div>
+
+<script>
+(function(){
+  var KEY = "billable-hour-brief-v1";
+  var ids = ["shop","techs","rate","wage","burden","weeks"];
+  var el = {};
+  ids.forEach(function(k){ el[k] = document.getElementById(k); });
+
+  var usd0 = new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0});
+  var usd2 = new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+  var num  = new Intl.NumberFormat("en-US",{maximumFractionDigits:0});
+  var num1 = new Intl.NumberFormat("en-US",{maximumFractionDigits:1});
+
+  function set(id, txt){ var n = document.getElementById(id); if (n) n.textContent = txt; }
+  function val(k, fallback){
+    var v = parseFloat(el[k].value);
+    return (isFinite(v) && v > 0) ? v : fallback;
+  }
+
+  function render(){
+    var shop   = (el.shop.value || "").trim() || "This shop";
+    var techs  = Math.max(1, Math.round(val("techs", 4)));
+    var rate   = val("rate", 150);
+    var wage   = val("wage", 33);
+    var burden = Math.max(1, val("burden", 1.3));
+    var weeks  = Math.min(52, Math.max(1, Math.round(val("weeks", 50))));
+
+    var loaded  = wage * burden;
+    var contrib = Math.max(0, rate - loaded);
+    var hours   = techs * weeks;              // one added hour, per tech, per week
+    var revenue = hours * rate;
+    var gp      = hours * contrib;
+
+    set("o-shop", shop);
+    set("o-lede-gp", usd0.format(gp));
+    set("o-rate", usd2.format(rate) + " / hr");
+    set("o-wage", usd2.format(wage) + " / hr");
+    set("o-burden-lbl", "(" + burden.toFixed(2) + "× burden)");
+    set("o-loaded", usd2.format(loaded) + " / hr");
+    set("o-contrib", usd2.format(contrib));
+    set("o-hours-lbl", techs + (techs === 1 ? " tech" : " techs") + " × 1 hour × " + weeks + " weeks");
+    set("o-hours", num.format(hours) + " hours");
+    set("o-gp", usd0.format(gp));
+    set("o-rev", usd0.format(revenue));
+
+    [0.5, 1, 2].forEach(function(mult, i){
+      var h = hours * mult;
+      set("s" + i + "-h", num1.format(h));
+      set("s" + i + "-r", usd0.format(h * rate));
+      set("s" + i + "-g", usd0.format(h * contrib));
+    });
+
+    set("o-techs-note", num.format(techs));
+    set("o-week-gp", usd0.format(techs * contrib));
+    set("o-month-gp", usd0.format(techs * contrib * 4.33));
+    set("o-weeks-note", num.format(weeks));
+
+    try { localStorage.setItem(KEY, JSON.stringify({
+      shop: el.shop.value, techs: el.techs.value, rate: el.rate.value,
+      wage: el.wage.value, burden: el.burden.value, weeks: el.weeks.value
+    })); } catch (e) {}
+  }
+
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved) ids.forEach(function(k){ if (saved[k] !== undefined && saved[k] !== "") el[k].value = saved[k]; });
+  } catch (e) {}
+
+  ids.forEach(function(k){
+    el[k].addEventListener("input", render);
+    el[k].addEventListener("change", render);
+  });
+  render();
+})();
+</script>
+
+</body>
+</html>
